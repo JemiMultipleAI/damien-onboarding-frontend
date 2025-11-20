@@ -1,364 +1,145 @@
 'use client';
 
-import { useState, useEffect } from "react";
-import { VideoCard } from "@/components/VideoCard";
-import { VideoPlayer } from "@/components/VideoPlayer";
-import { Progress } from "@/components/ui/progress";
-import { BookOpen, GraduationCap, AlertCircle } from "lucide-react";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Loader2 } from "lucide-react";
+import Link from "next/link";
+import { ArrowRight, CheckCircle2, Sparkles } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+const features = [
+  {
+    title: "AI Guidance",
+    description: "Conversational coaching that adapts to every learner.",
+  },
+  {
+    title: "Progress Intelligence",
+    description: "Real-time completion tracking with instant feedback loops.",
+  },
+  {
+    title: "Enterprise Ready",
+    description: "Secure architecture designed for modern onboarding teams.",
+  },
+];
 
-interface Video {
-  id: string;
-  title: string;
-  duration: string;
-  isCompleted: boolean;
-  thumbnail: string;
-  videoUrl?: string;
-}
-
-export default function HomePage() {
-  const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [videos, setVideos] = useState<Video[]>([
-    {
-      id: "1",
-      title: "Introduction to KissFlow",
-      duration: "Loading...",
-      isCompleted: false,
-      thumbnail: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&h=450&fit=crop",
-      videoUrl: "/videos/intro.mp4",
-    },
-    {
-      id: "2",
-      title: "Conditional Visibility",
-      duration: "Loading...",
-      isCompleted: false,
-      thumbnail: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=450&fit=crop",
-      videoUrl: "/videos/conditional-visibility.mp4",
-    },
-    {
-      id: "3",
-      title: "Accessing Process",
-      duration: "Loading...",
-      isCompleted: false,
-      thumbnail: "https://images.unsplash.com/photo-1553877522-43269d4ea984?w=800&h=450&fit=crop",
-      videoUrl: "/videos/accessing-process.mp4",
-    },
-    {
-      id: "4",
-      title: "Managing Items - Initiator",
-      duration: "Loading...",
-      isCompleted: false,
-      thumbnail: "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=800&h=450&fit=crop",
-      videoUrl: "/videos/managing-items-initiator.mp4",
-    },
-    {
-      id: "5",
-      title: "Managing Items - Assignee",
-      duration: "Loading...",
-      isCompleted: false,
-      thumbnail: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&h=450&fit=crop",
-      videoUrl: "/videos/managing-items-assignee.mp4",
-    },
-  ]);
-
-  // Load initial progress from backend
-  useEffect(() => {
-    const loadInitialData = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-
-        // Initial video list
-        const initialVideos: Video[] = [
-          {
-            id: "1",
-            title: "Introduction to KissFlow",
-            duration: "Loading...",
-            isCompleted: false,
-            thumbnail: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&h=450&fit=crop",
-            videoUrl: "/videos/intro.mp4",
-          },
-          {
-            id: "2",
-            title: "Conditional Visibility",
-            duration: "Loading...",
-            isCompleted: false,
-            thumbnail: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=450&fit=crop",
-            videoUrl: "/videos/conditional-visibility.mp4",
-          },
-          {
-            id: "3",
-            title: "Accessing Process",
-            duration: "Loading...",
-            isCompleted: false,
-            thumbnail: "https://images.unsplash.com/photo-1553877522-43269d4ea984?w=800&h=450&fit=crop",
-            videoUrl: "/videos/accessing-process.mp4",
-          },
-          {
-            id: "4",
-            title: "Managing Items - Initiator",
-            duration: "Loading...",
-            isCompleted: false,
-            thumbnail: "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=800&h=450&fit=crop",
-            videoUrl: "/videos/managing-items-initiator.mp4",
-          },
-          {
-            id: "5",
-            title: "Managing Items - Assignee",
-            duration: "Loading...",
-            isCompleted: false,
-            thumbnail: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&h=450&fit=crop",
-            videoUrl: "/videos/managing-items-assignee.mp4",
-          },
-        ];
-
-        // Fetch user progress from backend
-        const progressResponse = await fetch(`${API_BASE_URL}/api/videos/progress?userId=default`);
-        
-        if (!progressResponse.ok) {
-          throw new Error("Failed to load progress");
-        }
-
-        const progressData = await progressResponse.json();
-        const completedVideoIds = new Set(
-          progressData.progress
-            .filter((p: { completed: boolean }) => p.completed)
-            .map((p: { videoId: string }) => p.videoId)
-        );
-
-        // Load video durations and update completion status
-        const updatedVideos = await Promise.all(
-          initialVideos.map(async (video) => {
-            let duration = "Loading...";
-            
-            if (video.videoUrl) {
-              duration = await new Promise<string>((resolve) => {
-                const videoElement = document.createElement('video');
-                videoElement.preload = 'metadata';
-                
-                videoElement.onloadedmetadata = () => {
-                  const dur = videoElement.duration;
-                  const minutes = Math.floor(dur / 60);
-                  const seconds = Math.floor(dur % 60);
-                  resolve(`${minutes}:${seconds.toString().padStart(2, '0')}`);
-                };
-                
-                videoElement.onerror = () => {
-                  resolve("N/A");
-                };
-                
-                videoElement.src = video.videoUrl!;
-              });
-            }
-            
-            return {
-              ...video,
-              duration,
-              isCompleted: completedVideoIds.has(video.id)
-            };
-          })
-        );
-        
-        setVideos(updatedVideos);
-      } catch (err) {
-        console.error("Error loading initial data:", err);
-        setError(err instanceof Error ? err.message : "Failed to load data");
-        // Still load videos even if progress fails
-        const initialVideos: Video[] = [
-          {
-            id: "1",
-            title: "Introduction to KissFlow",
-            duration: "Loading...",
-            isCompleted: false,
-            thumbnail: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&h=450&fit=crop",
-            videoUrl: "/videos/intro.mp4",
-          },
-          {
-            id: "2",
-            title: "Conditional Visibility",
-            duration: "Loading...",
-            isCompleted: false,
-            thumbnail: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=450&fit=crop",
-            videoUrl: "/videos/conditional-visibility.mp4",
-          },
-          {
-            id: "3",
-            title: "Accessing Process",
-            duration: "Loading...",
-            isCompleted: false,
-            thumbnail: "https://images.unsplash.com/photo-1553877522-43269d4ea984?w=800&h=450&fit=crop",
-            videoUrl: "/videos/accessing-process.mp4",
-          },
-          {
-            id: "4",
-            title: "Managing Items - Initiator",
-            duration: "Loading...",
-            isCompleted: false,
-            thumbnail: "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=800&h=450&fit=crop",
-            videoUrl: "/videos/managing-items-initiator.mp4",
-          },
-          {
-            id: "5",
-            title: "Managing Items - Assignee",
-            duration: "Loading...",
-            isCompleted: false,
-            thumbnail: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&h=450&fit=crop",
-            videoUrl: "/videos/managing-items-assignee.mp4",
-          },
-        ];
-        const updatedVideos = await Promise.all(
-          initialVideos.map(async (video) => {
-            if (!video.videoUrl) return video;
-            
-            return new Promise<Video>((resolve) => {
-              const videoElement = document.createElement('video');
-              videoElement.preload = 'metadata';
-              
-              videoElement.onloadedmetadata = () => {
-                const duration = videoElement.duration;
-                const minutes = Math.floor(duration / 60);
-                const seconds = Math.floor(duration % 60);
-                const formattedDuration = `${minutes}:${seconds.toString().padStart(2, '0')}`;
-                
-                resolve({
-                  ...video,
-                  duration: formattedDuration
-                });
-              };
-              
-              videoElement.onerror = () => {
-                resolve({
-                  ...video,
-                  duration: "N/A"
-                });
-              };
-              
-              videoElement.src = video.videoUrl!;
-            });
-          })
-        );
-        setVideos(updatedVideos);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadInitialData();
-  }, []);
-
-  const completedCount = videos.filter(v => v.isCompleted).length;
-  const progressPercentage = (completedCount / videos.length) * 100;
-
-  const handleVideoClick = (video: Video) => {
-    setSelectedVideo(video);
-  };
-
-  const handleVideoComplete = async (videoId: string) => {
-    // Update local state immediately for better UX
-    setVideos(prev => prev.map(v => 
-      v.id === videoId ? { ...v, isCompleted: true } : v
-    ));
-
-    // Optionally sync with backend (progress is already saved by backend)
-    // This is just for local state management
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto mb-4" />
-          <p className="text-muted-foreground">Loading onboarding content...</p>
-        </div>
-      </div>
-    );
-  }
-
+export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-background">
-      {/* Error Alert */}
-      {error && (
-        <div className="max-w-6xl mx-auto px-4 pt-4">
-          <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
-            <AlertTitle>Error</AlertTitle>
-            <AlertDescription>
-              {error}. Progress may not be synced. Please refresh the page.
-            </AlertDescription>
-          </Alert>
-        </div>
-      )}
-
-      {/* Hero Section */}
-      <header className="relative overflow-hidden bg-gradient-to-br from-primary via-primary to-accent py-16 px-4">
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMzLjMxNCAwIDYgMi42ODYgNiA2cy0yLjY4NiA2LTYgNi02LTIuNjg2LTYtNiAyLjY4Ni02IDYtNnptMCAyYy0yLjIxIDAtNCAxLjc5LTQgNHMxLjc5IDQgNCA0IDQtMS43OSA0LTQtMS43OS00LTQtNHoiIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iLjEiLz48L2c+PC9zdmc+')] opacity-10"></div>
-        <div className="max-w-6xl mx-auto relative">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-              <GraduationCap className="h-7 w-7 text-white" />
-            </div>
-            <h1 className="text-4xl md:text-5xl font-bold text-white">
-              KissFlow Onboarding
-            </h1>
+    <div className="min-h-screen bg-background text-foreground">
+      <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top,_#1d4ed8_0%,_transparent_45%),radial-gradient(circle_at_bottom,_#9333ea_0%,_transparent_45%)] opacity-50" />
+      <header className="border-b border-white/10 bg-background/80 backdrop-blur">
+        <div className="max-w-6xl mx-auto flex items-center justify-between px-4 py-4">
+          <div>
+            <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
+              OnboardAI
+            </p>
+            <p className="text-lg font-semibold">Intelligent Onboarding</p>
           </div>
-          <p className="text-white/90 text-lg md:text-xl max-w-2xl">
-            Master KissFlow with our comprehensive video tutorials. Learn at your own pace and become a workflow automation expert.
-          </p>
+          <Button variant="outline" asChild>
+            <Link href="/login">Log In</Link>
+          </Button>
         </div>
       </header>
 
-      {/* Progress Section */}
-      <div className="max-w-6xl mx-auto px-4 -mt-6 sm:-mt-8 relative z-10">
-        <div className="bg-card rounded-2xl shadow-lg border border-border p-4 sm:p-6">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <BookOpen className="h-5 w-5 text-primary" />
-              <h3 className="font-semibold text-card-foreground">Your Progress</h3>
+      <main className="max-w-6xl mx-auto px-4 py-16 space-y-16">
+        <section className="relative overflow-hidden rounded-3xl border border-border bg-gradient-to-br from-indigo-500/20 via-background to-background p-10 shadow-[0_10px_60px_rgba(79,70,229,0.25)]">
+          <div className="absolute inset-0 opacity-30 bg-[radial-gradient(circle_at_center,#38bdf8_0,_transparent_55%)]" />
+          <div className="relative flex flex-col gap-6 max-w-2xl">
+            <div className="inline-flex items-center gap-2 rounded-full border border-border bg-background/80 px-3 py-1 text-xs uppercase tracking-[0.4em] text-muted-foreground w-fit">
+              <Sparkles className="h-3 w-3" />
+              OnboardAI
             </div>
-            <span className="text-sm font-medium text-muted-foreground">
-              {completedCount} of {videos.length} completed
-            </span>
+            <h1 className="text-4xl md:text-5xl font-bold leading-tight">
+              Launch onboarding experiences that feel guided, personal, and smart.
+            </h1>
+            <p className="text-lg text-muted-foreground">
+              Blend immersive video learning with a conversational AI mentor. OnboardAI gives every new teammate confidence, clarity, and momentum from day one.
+            </p>
+            <div className="flex flex-wrap gap-4">
+              <Button size="lg" asChild>
+                <Link href="/dashboard" className="inline-flex items-center gap-2">
+                  Explore Dashboard
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+              </Button>
+              <Button size="lg" variant="secondary" asChild>
+                <Link href="/login">Log In</Link>
+              </Button>
+            </div>
+            <div className="flex flex-wrap gap-6 pt-6 text-sm text-muted-foreground">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4 text-primary" />
+                Real-time progress sync
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4 text-primary" />
+                AI-powered validation
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4 text-primary" />
+                Secure & enterprise-ready
+              </div>
+            </div>
           </div>
-          <Progress value={progressPercentage} className="h-2" />
-        </div>
-      </div>
+        </section>
 
-      {/* Video Grid */}
-      <main className="max-w-6xl mx-auto px-4 py-8 sm:py-12">
-        <div className="mb-4 sm:mb-6">
-          <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-1 sm:mb-2">Training Videos</h2>
-          <p className="text-sm sm:text-base text-muted-foreground">Click on any video to start learning</p>
-        </div>
-        
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-          {videos.map((video) => (
-            <VideoCard
-              key={video.id}
-              title={video.title}
-              duration={video.duration}
-              isCompleted={video.isCompleted}
-              thumbnail={video.thumbnail}
-              onClick={() => handleVideoClick(video)}
-            />
-          ))}
-        </div>
+        <section className="space-y-8">
+          <div className="flex flex-col gap-2">
+            <p className="text-sm uppercase tracking-[0.3em] text-muted-foreground">
+              Platform
+            </p>
+            <h2 className="text-3xl font-bold tracking-tight">Built for modern onboarding teams</h2>
+            <p className="text-muted-foreground max-w-2xl">
+              OnboardAI turns your knowledge base into a guided, immersive journey. Launch once, update effortlessly, and keep every user aligned with built-in analytics.
+            </p>
+          </div>
+          <div className="grid gap-6 md:grid-cols-3">
+            {features.map((feature) => (
+              <div
+                key={feature.title}
+                className="rounded-2xl border border-border bg-card p-6 shadow-sm hover:-translate-y-1 transition-transform"
+              >
+                <div className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+                  <Sparkles className="h-4 w-4 text-primary" />
+                </div>
+                <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
+                <p className="text-sm text-muted-foreground">{feature.description}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="rounded-3xl border border-border bg-card p-10">
+          <div className="grid gap-8 md:grid-cols-2">
+            <div className="space-y-4">
+              <p className="text-sm uppercase tracking-[0.3em] text-muted-foreground">
+                Why OnboardAI
+              </p>
+              <h2 className="text-3xl font-bold tracking-tight">
+                Replace static training with a living, conversational experience.
+              </h2>
+              <p className="text-muted-foreground">
+                The dashboard you already have stays untouched. This landing page simply routes users into that immersive coaching space, while giving prospects a polished introduction to OnboardAI.
+              </p>
+            </div>
+            <div className="rounded-2xl border border-dashed border-border p-6 space-y-4">
+              <p className="text-sm uppercase tracking-[0.3em] text-primary">
+                Quick Access
+              </p>
+              <div className="flex flex-col gap-3">
+                <Link
+                  href="/dashboard"
+                  className="flex items-center justify-between rounded-xl border border-border px-4 py-3 hover:bg-muted"
+                >
+                  <div>
+                    <p className="text-sm font-semibold">Dashboard</p>
+                    <p className="text-xs text-muted-foreground">
+                      Continue to the training experience
+                    </p>
+                  </div>
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+              </div>
+            </div>
+          </div>
+        </section>
       </main>
-
-      {/* Video Player Modal */}
-      {selectedVideo && (
-        <VideoPlayer
-          videoId={selectedVideo.id}
-          title={selectedVideo.title}
-          videoUrl={selectedVideo.videoUrl}
-          onClose={() => setSelectedVideo(null)}
-          onComplete={() => handleVideoComplete(selectedVideo.id)}
-        />
-      )}
     </div>
   );
 }
