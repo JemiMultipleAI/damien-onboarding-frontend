@@ -4,6 +4,8 @@ import Link from "next/link";
 import { ArrowRight, CheckCircle2, Sparkles, Bot, Zap, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
+import { MichaelChatWidget } from "@/components/MichaelChatWidget";
+import { useAgentConfig } from "@/contexts/AgentConfigContext";
 
 const features = [
   {
@@ -22,6 +24,7 @@ const features = [
 
 export default function LandingPage() {
   const [mounted, setMounted] = useState(false);
+  const { michaelAgentId, loading: agentLoading } = useAgentConfig();
 
   useEffect(() => {
     setMounted(true);
@@ -164,6 +167,9 @@ export default function LandingPage() {
           </div>
         </section>
       </main>
+
+      {/* Michael AI Chat Widget */}
+      <MichaelChatWidget />
     </div>
   );
 }

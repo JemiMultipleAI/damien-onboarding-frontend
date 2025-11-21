@@ -6,6 +6,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
 interface AgentConfigContextType {
   agentIds: Record<string, string>;
+  michaelAgentId: string | null;
   loading: boolean;
   error: string | null;
   getAgentId: (videoId: string) => string | null;
@@ -28,6 +29,7 @@ interface AgentConfigProviderProps {
 
 export const AgentConfigProvider = ({ children }: AgentConfigProviderProps) => {
   const [agentIds, setAgentIds] = useState<Record<string, string>>({});
+  const [michaelAgentId, setMichaelAgentId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -38,13 +40,16 @@ export const AgentConfigProvider = ({ children }: AgentConfigProviderProps) => {
 
       // Fetch all agent IDs from backend
       // The backend returns a mapping of video IDs to agent IDs
-      const response = await fetch(`${API_BASE_URL}/api/agents`);
+      const [agentsResponse, michaelResponse] = await Promise.all([
+        fetch(`${API_BASE_URL}/api/agents`),
+        fetch(`${API_BASE_URL}/api/agents/michael`).catch(() => null) // Gracefully handle if endpoint doesn't exist
+      ]);
       
-      if (!response.ok) {
+      if (!agentsResponse.ok) {
         throw new Error("Failed to fetch agent configuration");
       }
 
-      const data = await response.json();
+      const data = await agentsResponse.json();
       
       // Backend returns mappings object with video IDs as keys and agent IDs as values
       if (data.mappings && typeof data.mappings === "object") {
@@ -58,6 +63,19 @@ export const AgentConfigProvider = ({ children }: AgentConfigProviderProps) => {
         setAgentIds(agentMap);
       } else {
         throw new Error("Invalid agent configuration format");
+      }
+
+      // Check if Michael's agent ID is in the main response
+      if (data.michael && typeof data.michael === "string" && data.michael.trim() !== "") {
+        setMichaelAgentId(data.michael);
+      }
+
+      // Also try fetching from dedicated endpoint
+      if (michaelResponse && michaelResponse.ok) {
+        const michaelData = await michaelResponse.json();
+        if (michaelData.agentId && typeof michaelData.agentId === "string") {
+          setMichaelAgentId(michaelData.agentId);
+        }
       }
     } catch (err) {
       console.error("Error fetching agent configuration:", err);
@@ -83,6 +101,7 @@ export const AgentConfigProvider = ({ children }: AgentConfigProviderProps) => {
     <AgentConfigContext.Provider
       value={{
         agentIds,
+        michaelAgentId,
         loading,
         error,
         getAgentId,
