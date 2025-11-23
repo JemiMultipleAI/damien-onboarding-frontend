@@ -38,12 +38,44 @@ export default function DashboardPage() {
   const [userName, setUserName] = useState<string | null>(null);
   const [videos, setVideos] = useState<Video[]>([
     {
+      id: "1",
+      title: "Introduction to KissFlow",
+      duration: "Loading...",
+      isCompleted: false,
+      thumbnail: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&h=450&fit=crop",
+      videoUrl: "/videos/intro.mp4",
+    },
+    {
+      id: "2",
+      title: "Conditional Visibility",
+      duration: "Loading...",
+      isCompleted: false,
+      thumbnail: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=450&fit=crop",
+      videoUrl: "/videos/conditional-visibility.mp4",
+    },
+    {
+      id: "3",
+      title: "Accessing Process",
+      duration: "Loading...",
+      isCompleted: false,
+      thumbnail: "https://images.unsplash.com/photo-1553877522-43269d4ea984?w=800&h=450&fit=crop",
+      videoUrl: "/videos/accessing-process.mp4",
+    },
+    {
       id: "4",
       title: "Managing Items - Initiator",
       duration: "Loading...",
       isCompleted: false,
       thumbnail: "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=800&h=450&fit=crop",
       videoUrl: "/videos/managing-items-initiator.mp4",
+    },
+    {
+      id: "5",
+      title: "Managing Items - Assignee",
+      duration: "Loading...",
+      isCompleted: false,
+      thumbnail: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&h=450&fit=crop",
+      videoUrl: "/videos/managing-items-assignee.mp4",
     },
   ]);
 
@@ -70,12 +102,44 @@ export default function DashboardPage() {
 
         const initialVideos: Video[] = [
           {
+            id: "1",
+            title: "Introduction to KissFlow",
+            duration: "Loading...",
+            isCompleted: false,
+            thumbnail: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&h=450&fit=crop",
+            videoUrl: "/videos/intro.mp4",
+          },
+          {
+            id: "2",
+            title: "Conditional Visibility",
+            duration: "Loading...",
+            isCompleted: false,
+            thumbnail: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=450&fit=crop",
+            videoUrl: "/videos/conditional-visibility.mp4",
+          },
+          {
+            id: "3",
+            title: "Accessing Process",
+            duration: "Loading...",
+            isCompleted: false,
+            thumbnail: "https://images.unsplash.com/photo-1553877522-43269d4ea984?w=800&h=450&fit=crop",
+            videoUrl: "/videos/accessing-process.mp4",
+          },
+          {
             id: "4",
             title: "Managing Items - Initiator",
             duration: "Loading...",
             isCompleted: false,
             thumbnail: "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=800&h=450&fit=crop",
             videoUrl: "/videos/managing-items-initiator.mp4",
+          },
+          {
+            id: "5",
+            title: "Managing Items - Assignee",
+            duration: "Loading...",
+            isCompleted: false,
+            thumbnail: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&h=450&fit=crop",
+            videoUrl: "/videos/managing-items-assignee.mp4",
           },
         ];
 
@@ -131,12 +195,44 @@ export default function DashboardPage() {
 
         const initialVideos: Video[] = [
           {
+            id: "1",
+            title: "Introduction to KissFlow",
+            duration: "Loading...",
+            isCompleted: false,
+            thumbnail: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&h=450&fit=crop",
+            videoUrl: "/videos/intro.mp4",
+          },
+          {
+            id: "2",
+            title: "Conditional Visibility",
+            duration: "Loading...",
+            isCompleted: false,
+            thumbnail: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=450&fit=crop",
+            videoUrl: "/videos/conditional-visibility.mp4",
+          },
+          {
+            id: "3",
+            title: "Accessing Process",
+            duration: "Loading...",
+            isCompleted: false,
+            thumbnail: "https://images.unsplash.com/photo-1553877522-43269d4ea984?w=800&h=450&fit=crop",
+            videoUrl: "/videos/accessing-process.mp4",
+          },
+          {
             id: "4",
             title: "Managing Items - Initiator",
             duration: "Loading...",
             isCompleted: false,
             thumbnail: "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=800&h=450&fit=crop",
             videoUrl: "/videos/managing-items-initiator.mp4",
+          },
+          {
+            id: "5",
+            title: "Managing Items - Assignee",
+            duration: "Loading...",
+            isCompleted: false,
+            thumbnail: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&h=450&fit=crop",
+            videoUrl: "/videos/managing-items-assignee.mp4",
           },
         ];
         const updatedVideos = await Promise.all(
