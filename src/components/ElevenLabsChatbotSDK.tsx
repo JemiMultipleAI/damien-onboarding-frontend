@@ -13,6 +13,7 @@ interface ElevenLabsChatbotSDKProps {
   videoId: string
   onConversationStart?: (conversationId: string) => void
   textOnly?: boolean
+  autoStart?: boolean
 }
 
 export default function ElevenLabsChatbotSDK({
@@ -20,6 +21,7 @@ export default function ElevenLabsChatbotSDK({
   videoId,
   onConversationStart,
   textOnly = false,
+  autoStart = true,
 }: ElevenLabsChatbotSDKProps) {
   const [inputValue, setInputValue] = useState('')
   const [isConnecting, setIsConnecting] = useState(false)
@@ -36,9 +38,9 @@ export default function ElevenLabsChatbotSDK({
     addMessage,
   } = useGlobalConversation()
 
-  // Auto-start or resume conversation when component mounts
+  // Auto-start or resume conversation when component mounts (only if autoStart is true)
   useEffect(() => {
-    if (!agentId) return
+    if (!agentId || !autoStart) return
 
     const initializeConversation = async () => {
       try {
@@ -57,7 +59,7 @@ export default function ElevenLabsChatbotSDK({
 
     initializeConversation()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [agentId]) // Only run when agentId changes
+  }, [agentId, autoStart]) // Run when agentId or autoStart changes
 
   // Scroll to bottom when new messages arrive
   useEffect(() => {

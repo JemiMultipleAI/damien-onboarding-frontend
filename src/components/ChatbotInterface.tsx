@@ -16,9 +16,10 @@ interface ChatbotInterfaceProps {
   videoTitle: string;
   onComplete: () => void;
   onClose: () => void;
+  autoStart?: boolean;
 }
 
-export const ChatbotInterface = ({ videoId, videoTitle, onComplete, onClose }: ChatbotInterfaceProps) => {
+export const ChatbotInterface = ({ videoId, videoTitle, onComplete, onClose, autoStart = true }: ChatbotInterfaceProps) => {
   const { getAgentId, loading: loadingAgentConfig, error: agentConfigError } = useAgentConfig();
   const agentId = getAgentId(videoId);
   const [isCompleted, setIsCompleted] = useState(false);
@@ -156,6 +157,7 @@ export const ChatbotInterface = ({ videoId, videoTitle, onComplete, onClose }: C
             startPollingForCompletion(convId);
           }}
           textOnly={false} // Set to true for text-only mode, false for voice
+          autoStart={autoStart} // Only start conversation when video has ended
         />
       </div>
 

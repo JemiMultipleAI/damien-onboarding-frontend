@@ -94,6 +94,7 @@ export const VideoPlayer = ({ videoId, title, videoUrl, onClose, onComplete }: V
                 videoTitle={title}
                 onComplete={handleChatbotComplete}
                 onClose={onClose}
+                autoStart={mode === "chatbot"} // Only auto-start when chatbot is visible (after video ends)
               />
             </div>
           </div>
