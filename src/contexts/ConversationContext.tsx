@@ -51,13 +51,27 @@ export const ConversationProvider = ({ children, textOnly = false }: Conversatio
 
   const conversation = useConversation({
     textOnly,
-    onMessage: (message) => {
+    onMessage: (message: any) => {
       // Handle incoming messages
-      if (message.type === 'user_message' || message.type === 'agent_message') {
-        const newMessage = {
+      // Check if message has type property (for structured messages) or use source/role
+      const messageType = (message as any).type;
+      const messageSource = (message as any).source;
+      const messageText = (message as any).message || (message as any).text || '';
+      
+      if (messageType === 'user_message' || messageType === 'agent_message' || 
+          messageSource === 'user' || messageSource === 'agent') {
+        const role: 'user' | 'agent' | 'system' = 
+          (messageType === 'user_message' || messageSource === 'user') ? 'user' : 'agent';
+        
+        const newMessage: {
+          id: string;
+          role: 'user' | 'agent' | 'system';
+          content: string;
+          timestamp: Date;
+        } = {
           id: `${Date.now()}-${Math.random()}`,
-          role: message.type === 'user_message' ? 'user' : 'agent' as const,
-          content: message.message || '',
+          role,
+          content: messageText,
           timestamp: new Date(),
         };
         setMessages((prev) => [...prev, newMessage]);
