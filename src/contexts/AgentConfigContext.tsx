@@ -40,13 +40,25 @@ export const AgentConfigProvider = ({ children }: AgentConfigProviderProps) => {
 
       // Fetch all agent IDs from backend
       // The backend returns a mapping of video IDs to agent IDs
-      const [agentsResponse, michaelResponse] = await Promise.all([
-        fetch(`${API_BASE_URL}/api/agents`),
-        fetch(`${API_BASE_URL}/api/agents/michael`).catch(() => null) // Gracefully handle if endpoint doesn't exist
-      ]);
+      let agentsResponse: Response;
+      let michaelResponse: Response | null = null;
+      
+      try {
+        [agentsResponse, michaelResponse] = await Promise.all([
+          fetch(`${API_BASE_URL}/api/agents`),
+          fetch(`${API_BASE_URL}/api/agents/michael`).catch(() => null) // Gracefully handle if endpoint doesn't exist
+        ]);
+      } catch (fetchError: any) {
+        // Network error (CORS, connection refused, etc.)
+        if (fetchError.name === 'TypeError' || fetchError.message?.includes('fetch')) {
+          throw new Error(`Cannot connect to backend at ${API_BASE_URL}. Please ensure the backend server is running and CORS is configured correctly.`);
+        }
+        throw fetchError;
+      }
       
       if (!agentsResponse.ok) {
-        throw new Error("Failed to fetch agent configuration");
+        const errorText = await agentsResponse.text().catch(() => 'Unknown error');
+        throw new Error(`Backend returned error ${agentsResponse.status}: ${errorText}`);
       }
 
       const data = await agentsResponse.json();
@@ -62,7 +74,7 @@ export const AgentConfigProvider = ({ children }: AgentConfigProviderProps) => {
         });
         setAgentIds(agentMap);
       } else {
-        throw new Error("Invalid agent configuration format");
+        throw new Error("Invalid agent configuration format from backend");
       }
 
       // Check if Michael's agent ID is in the main response
@@ -79,7 +91,10 @@ export const AgentConfigProvider = ({ children }: AgentConfigProviderProps) => {
       }
     } catch (err) {
       console.error("Error fetching agent configuration:", err);
-      setError(err instanceof Error ? err.message : "Failed to load agent configuration");
+      const errorMessage = err instanceof Error 
+        ? err.message 
+        : "Failed to load agent configuration. Please check backend connection and configuration.";
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

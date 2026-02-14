@@ -62,6 +62,14 @@ const Index = () => {
       thumbnail: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&h=450&fit=crop",
       videoUrl: "/videos/managing-items-assignee.mp4",
     },
+    {
+      id: "6",
+      title: "Video",
+      duration: "Loading...",
+      isCompleted: false,
+      thumbnail: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&h=450&fit=crop",
+      videoUrl: "/videos/video.mp4",
+    },
   ]);
 
   // Load initial progress from backend
@@ -112,6 +120,14 @@ const Index = () => {
             isCompleted: false,
             thumbnail: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&h=450&fit=crop",
             videoUrl: "/videos/managing-items-assignee.mp4",
+          },
+          {
+            id: "6",
+            title: "Video",
+            duration: "Loading...",
+            isCompleted: false,
+            thumbnail: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&h=450&fit=crop",
+            videoUrl: "/videos/video.mp4",
           },
         ];
 
@@ -207,6 +223,14 @@ const Index = () => {
             isCompleted: false,
             thumbnail: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&h=450&fit=crop",
             videoUrl: "/videos/managing-items-assignee.mp4",
+          },
+          {
+            id: "6",
+            title: "Video",
+            duration: "Loading...",
+            isCompleted: false,
+            thumbnail: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&h=450&fit=crop",
+            videoUrl: "/videos/video.mp4",
           },
         ];
         const updatedVideos = await Promise.all(

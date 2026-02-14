@@ -25,6 +25,7 @@ export default function ElevenLabsChatbotSDK({
 }: ElevenLabsChatbotSDKProps) {
   const [inputValue, setInputValue] = useState('')
   const [isConnecting, setIsConnecting] = useState(false)
+  const [connectionError, setConnectionError] = useState<string | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const scrollAreaRef = useRef<HTMLDivElement>(null)
 
@@ -42,17 +43,28 @@ export default function ElevenLabsChatbotSDK({
   useEffect(() => {
     if (!agentId || !autoStart) return
 
+    // Validate agent ID format
+    if (!agentId.trim() || !agentId.startsWith('agent_')) {
+      setConnectionError('Invalid agent ID. Please check backend configuration.')
+      return
+    }
+
     const initializeConversation = async () => {
       try {
         setIsConnecting(true)
+        setConnectionError(null)
         const convId = await startConversation(agentId, 'default')
         
         if (convId && onConversationStart) {
           onConversationStart(convId)
+        } else if (!convId) {
+          setConnectionError('Failed to start conversation. Please check your ElevenLabs API key and agent configuration.')
         }
         setIsConnecting(false)
-      } catch (error) {
+      } catch (error: any) {
         console.error('❌ Failed to initialize conversation:', error)
+        const errorMessage = error?.message || error?.toString() || 'Failed to connect to agent. Please check your network connection and API configuration.'
+        setConnectionError(errorMessage)
         setIsConnecting(false)
       }
     }
@@ -106,7 +118,21 @@ export default function ElevenLabsChatbotSDK({
       {/* Messages Area */}
       <ScrollArea className="flex-1 p-4" ref={scrollAreaRef}>
         <div className="space-y-4">
-          {isConnecting && (
+          {connectionError && (
+            <div className="flex flex-col items-center justify-center py-8 px-4">
+              <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4 max-w-md">
+                <p className="text-destructive font-semibold mb-2">Connection Error</p>
+                <p className="text-sm text-destructive/80">{connectionError}</p>
+                <p className="text-xs text-muted-foreground mt-3">
+                  Please ensure:
+                  <br />• Agent ID is configured in backend .env file
+                  <br />• ElevenLabs API key is set correctly
+                  <br />• Backend server is running
+                </p>
+              </div>
+            </div>
+          )}
+          {isConnecting && !connectionError && (
             <div className="flex items-center justify-center py-8">
               <Loader2 className="h-6 w-6 animate-spin text-primary mr-2" />
               <span className="text-muted-foreground">
